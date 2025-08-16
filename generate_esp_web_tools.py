@@ -32,7 +32,19 @@ def fill_manifest(github_username, github_project, github_build_number):
                 "parts": [
                     {"path": f"firmware/{find_firmware_name('esp32s3.bin')}.bin", "offset": 0}
                 ]
-            }
+            },
+            {
+                "chipFamily": "ESP32-C3",
+                "parts": [
+                    {"path": f"firmware/{find_firmware_name('esp32c3.bin')}.bin", "offset": 0}
+                ]
+            },
+            {
+                "chipFamily": "ESP32-C6",
+                "parts": [
+                    {"path": f"firmware/{find_firmware_name('esp32c6.bin')}.bin", "offset": 0}
+                ]
+            },
         ]
     }
 
