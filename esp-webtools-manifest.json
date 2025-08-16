@@ -1,0 +1,43 @@
+{
+  "name": "Wilaz/LVS-Gateway",
+  "version": "0.0.3",
+  "funding_url": "https://github.com/Wilaz/LVS-Gateway/contributors",
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "firmware/Wilaz_LVS-Gateway_b3_esp32.bin",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        {
+          "path": "firmware/Wilaz_LVS-Gateway_b3_esp32s3.bin",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "chipFamily": "ESP32-C3",
+      "parts": [
+        {
+          "path": "firmware/Wilaz_LVS-Gateway_b3_esp32c3.bin",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "chipFamily": "ESP32-C6",
+      "parts": [
+        {
+          "path": "firmware/None.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
