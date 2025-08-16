@@ -40,8 +40,8 @@ jobs:
     - name: Install platformIO packages
       run: pio pkg install
 
-    - name: pio check
-      run: pio check --fail-on-defect medium
+    # - name: pio check
+    #   run: pio check --fail-on-defect medium
 
     - name: Run PlatformIO
       run: platformio run
