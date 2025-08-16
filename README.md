@@ -8,19 +8,19 @@ You bought a cheap vibrating toy from China that claims app support only to find
 
 # Installation & Usage
 
-## Prerequisites
+### Prerequisites
 
 - ESP32 or ESP32-S3 development board
 - USB cable
 - Browser supporting Web Serial
 
-## Installation
+### Installation
 
 1. Go to https://wilaz.github.io/LVS-Gateway/
 2. Plug in your ESP32 board
 3. Press the [connect] button and follow the instructions
 
-## Usage
+### Usage
 
 - Place the ESP32 near the toy and power it on
 - Connect to the bluetooth device named "LVS-Gateway" on your preferred control device
