@@ -17,13 +17,10 @@ void setup() {
   Serial.begin(115200);
 
   while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB
-  }
+    // wait for serial port to connect. Needed for native USB
+  };
 
   Serial.println("program started");
-  Serial.println();
-  Serial.println();
-  Serial.println(F("RS485 RTU SDM120***"));
 
   bluetooth_service_init();
 

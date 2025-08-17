@@ -10,9 +10,8 @@ void bluetooth_service_init() {
   NimBLEServer *pServer = NimBLEDevice::createServer();
 
   NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
-  pAdvertising->setScanResponse(true);
-  pAdvertising->setMinPreferred(0x12);
-  pAdvertising->setMinPreferred(0x02);
+  pAdvertising->enableScanResponse(true);
+  pAdvertising->setPreferredParams(0x012, 0x120);
 }
 
 void bluetooth_service_start() {

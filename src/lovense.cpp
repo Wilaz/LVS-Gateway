@@ -38,12 +38,12 @@ std::string generate_response(const std::string& command) {
         return get_battery_level();
     } else if (command == "Status:1;") {
         return get_device_status();
-    } else if (command.find("AutoSwitch:") == 0) {
+    } else if (command.starts_with("AutoSwitch:")) {
         return set_auto_switch_options(command);
-    } else if (command.find("Vibrate:") == 0) {
+    } else if (command.starts_with("Vibrate:")) {
         return set_vibration_speed(command);
     } else if (command == "PowerOff;") {
-        return set_vibration_speed(0);
+        return set_vibration_speed("Vibrate:0;");
     } else {
         return "OK;";
     }
@@ -54,8 +54,8 @@ std::string get_device_info() {
     std::string deviceType = "G";
 
     // Retrieve MAC address as bytes
-    uint8_t mac[6];
-    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+    uint8_t mac[6] = {1, 2, 3, 4, 5, 6};
+    // esp_read_mac(mac, ESP_MAC_WIFI_STA);
 
     // Generate the full MAC address
     char macAddressStr[18];
