@@ -10,7 +10,7 @@ You bought a cheap vibrating toy from China that claims app support only to find
 
 ### Prerequisites
 
-- ESP32 or ESP32-S3 development board
+- ESP32-(s2|s3|c3|c6) development board
 - USB cable
 - Browser supporting Web Serial
 

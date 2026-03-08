@@ -28,6 +28,12 @@ def fill_manifest(github_username, github_project, github_build_number):
                 ]
             },
             {
+                "chipFamily": "ESP32-S2",
+                "parts": [
+                    {"path": f"firmware/{find_firmware_name('esp32s2.bin')}.bin", "offset": 0}
+                ]
+            },
+            {
                 "chipFamily": "ESP32-S3",
                 "parts": [
                     {"path": f"firmware/{find_firmware_name('esp32s3.bin')}.bin", "offset": 0}
