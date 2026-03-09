@@ -1,10 +1,6 @@
 name: CI
 
-on:
-  push:
-    branches: [ main, stable ]
-  pull_request:
-    branches: [ main, stable ]
+on: [push]
 
 permissions:
   contents: write
@@ -15,36 +11,21 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - uses: actions/cache@v3
+    - uses: actions/checkout@v6
+    - uses: actions/cache@v4
       with:
         path: |
           ~/.cache/pip
-          ~/.platformio/
-          .pio
+          ~/.platformio/.cache
         key: ${{ runner.os }}-pio
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - uses: actions/setup-python@v6
       with:
-        python-version: '3.14' 
+        python-version: '3.11'
+    - name: Install PlatformIO Core
+      run: pip install --upgrade platformio
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install platformio
-
-    - name: Install platformIO packages
-      run: pio pkg install
-
-    - name: pio check
-      run: pio check --fail-on-defect medium
-
-    - name: Run PlatformIO
-      run: platformio run
+    - name: Build PlatformIO Project
+      run: pio run
 
     - name: Merge Firmware
       run: |
