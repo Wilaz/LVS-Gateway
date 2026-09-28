@@ -8,10 +8,11 @@
 
 #include "bluetooth_service.h"
 
-#include "muse.h"
 #include "lovense.h"
+#include "muse.h"
 
-static const char* TAG = "main";
+
+static const char *TAG = "main";
 
 void setup() {
   Serial.begin(115200);
@@ -34,6 +35,7 @@ void setup() {
 }
 
 void loop() {
-  // In this example, the main loop is not used since the lovense sensor task runs independently.
-  // You can add other tasks or functionality here if needed.
+  // In this example, the main loop is not used since the lovense sensor task
+  // runs independently. You can add other tasks or functionality here if
+  // needed.
 }

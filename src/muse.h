@@ -1,7 +1,8 @@
 #pragma once
 
-#include <NimBLEDevice.h>
 #include <NimBLEAdvertisedDevice.h>
+#include <NimBLEDevice.h>
+
 
 void muse_start();
 void muse_stop();

@@ -2,17 +2,17 @@
 
 A bridge to translates the Lovense BLE protocol into broadcast commands for MuSE, LoveSpouse, and Leten toys.
 
-# Motivation
+# Use Case?
 
-You bought a cheap vibrating toy from China that claims app support only to find out it doesn't support XToys.app/buttplug.io/etc.
+You bought a cheap vibrating toy that claims app support only to find it doesn't support XToys.app/buttplug.io/etc.
 
 # Installation & Usage
 
 ### Prerequisites
 
-- ESP32-(s2|s3|c3|c6) development board
-- USB cable
-- Browser supporting Web Serial
+- An ESP32-S2, S3, C3, C6, or vanilla development board
+- A USB cable
+- A browser supporting Web Serial
 
 ### Installation
 
@@ -23,13 +23,13 @@ You bought a cheap vibrating toy from China that claims app support only to find
 ### Usage
 
 - Place the ESP32 near the toy and power it on
-- Connect to the bluetooth device named "LVS-Gateway" on your preferred control device
+- Connect to the Bluetooth device named "LVS-Gateway" on your preferred control device
 
 # FAQ
 
 Q: Does this support XToys.app?
 
-A: Yes, just connect a Lovense device via bluetooth
+A: Yes, just connect a Lovense device via Bluetooth
 
 ---
 
@@ -47,14 +47,13 @@ A: No, see [iostindex.com](https://iostindex.com) for an overview
 
 Q: Can I control more than one device at the same time?
 
-A: Yes, all supported devices near the ESP32 will receive the same commands.
+A: Yes, all supported devices near the ESP32 will receive the same commands
 
 ---
 
 Q: How do I now if this is working?
 
-A: If it vibrates, it's working. There is no other way to tell because of the non-standard way the toys use bluetooth.
-
+A: If it vibrates, it's working. There is no other way to tell due to the nonstandard way the toys use Bluetooth
 
 # Connectivity
 

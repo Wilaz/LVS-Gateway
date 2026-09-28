@@ -10,35 +10,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v7
 
-    - uses: actions/checkout@v6
-    - uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cache/pip
-          ~/.platformio/.cache
-        key: ${{ runner.os }}-pio
-    - uses: actions/setup-python@v6
-      with:
-        python-version: '3.14'
-    - name: Install PlatformIO Core
-      run: pip install --upgrade platformio
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
 
-    - name: Build PlatformIO Project
-      run: pio run
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
 
-    - name: Merge Firmware
-      run: |
-        ./generate_merge_firmware_command.py esp32dev esp32s2 esp32s3 esp32c3 esp32c6 | tee merge_firmware.bash
-        bash -ex ./merge_firmware.bash
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
 
-    - name: Generate ESP Web Tools
-      run: |
-        ./generate_esp_web_tools.py
-        find web/
+      - name: Build PlatformIO Project
+        run: pio run
 
-    - name: Deploy to GitHub Pages
-      if: ${{ github.event_name != 'pull_request' }}
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        folder: web/
+      - name: Merge Firmware
+        run: |
+          ./generate_merge_firmware_command.py esp32dev esp32s2 esp32s3 esp32c3 esp32c6 | tee merge_firmware.bash
+          bash -ex ./merge_firmware.bash
+
+      - name: Generate ESP Web Tools
+        run: |
+          ./generate_esp_web_tools.py
+          find web/
+
+      - name: Deploy to GitHub Pages
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: web/

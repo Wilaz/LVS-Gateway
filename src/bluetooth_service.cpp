@@ -1,6 +1,6 @@
 #include "bluetooth_service.h"
 
-static const char* TAG = "bluetooth_service";
+static const char *TAG = "bluetooth_service";
 
 void bluetooth_service_init() {
   // Initialize the NimBLE device
@@ -14,10 +14,6 @@ void bluetooth_service_init() {
   pAdvertising->setPreferredParams(0x012, 0x120);
 }
 
-void bluetooth_service_start() {
-  NimBLEDevice::startAdvertising();
-}
+void bluetooth_service_start() { NimBLEDevice::startAdvertising(); }
 
-void bluetooth_service_stop() {
-  NimBLEDevice::stopAdvertising();
-}
+void bluetooth_service_stop() { NimBLEDevice::stopAdvertising(); }
