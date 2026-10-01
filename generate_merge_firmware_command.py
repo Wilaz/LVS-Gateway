@@ -5,49 +5,66 @@ import subprocess
 import sys
 import os
 
-
 def parse_output(line):
-    parser = argparse.ArgumentParser(allow_abbrev=False)
+    # Clean up the line to handle both 'esptool.py' and 'python -m esptool' formats
+    parts = line.split()
+    
+    # Strip leading python / module wrappers if present to align arguments
+    if "esptool" in parts[0] or parts[0].endswith("python") or parts[0].endswith("python3"):
+        # Find where the actual esptool arguments begin (usually after chip, or after python -m esptool)
+        try:
+            chip_idx = parts.index("--chip")
+            # Reconstruct a clean argument list starting from --chip
+            parts = parts[chip_idx:]
+        except ValueError:
+            pass
 
-    parser.add_argument("python_path", type=str, help="Path to python")
-    parser.add_argument("esptool_path", type=str, help="Path to esptool.py")
+    parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument("--chip", type=str, help="Chip name")
     parser.add_argument("--port", type=str, help="Port")
     parser.add_argument("--baud", type=int, help="Baud rate")
     parser.add_argument("--flash_mode", type=str, help="Flash mode", default="dio")
     parser.add_argument("--flash_freq", type=str, help="Flash frequency", default="40m")
     parser.add_argument("--flash_size", type=str, help="Flash size", default="4MB")
-    parser.add_argument("--output", "-o", type=str, help="Output file")
-
-    args, unrecognized = parser.parse_known_args(line.split())
+    
+    # Allow parsing known flags, leaving flash offsets and binaries in unrecognized
+    args, unrecognized = parser.parse_known_args(parts)
 
     binary_files = {}
-    for i in range(len(unrecognized) - 1):
+    i = 0
+    while i < len(unrecognized) - 1:
         if unrecognized[i].startswith("0x"):
-            offset, bin_path = unrecognized[i : i + 2]
+            offset, bin_path = unrecognized[i], unrecognized[i+1]
             binary_files[offset] = bin_path
+            i += 2
+        else:
+            i += 1
 
-    print(f"DEBUG line: {line}", file=sys.stderr)
-    print(f"DEBUG args: {args}", file=sys.stderr)
-    print(f"DEBUG unrecognized: {unrecognized}", file=sys.stderr)
+    print(f"DEBUG chip: {args.chip}", file=sys.stderr)
     print(f"DEBUG binary_files: {binary_files}", file=sys.stderr)
 
-    # Extract the GitHub build number from the environment (assuming it is set)
+    # Extract GitHub metadata
     github_build_number = os.environ.get("GITHUB_RUN_NUMBER", "00000")
-    github_owner_name, github_repo_name = os.environ.get(
-        "GITHUB_REPOSITORY", "user/repo"
-    ).split("/")
+    repo_env = os.environ.get("GITHUB_REPOSITORY", "user/repo")
+    if "/" in repo_env:
+        github_owner_name, github_repo_name = repo_env.split("/")
+    else:
+        github_owner_name, github_repo_name = "user", repo_env
 
-    # Generate the output command
+    os.makedirs("web/firmware", exist_ok=True)
+    output_filename = f"web/firmware/{github_owner_name}_{github_repo_name}_b{github_build_number}_{args.chip}.bin"
+
+    # Locate python and esptool dynamically from environment or fallback
+    python_exec = sys.executable
+    
+    # Generate the merge_bin command required by ESP Web Tools
     new_command = (
-        f"{args.python_path} "
-        f"{args.esptool_path}"
-        f" --chip {args.chip} merge_bin "
-        f"-o web/firmware/{github_owner_name}_{github_repo_name}_b{github_build_number}_{args.chip}.bin "
+        f"{python_exec} -m esptool "
+        f"--chip {args.chip} merge_bin "
+        f"-o {output_filename} "
         f"--flash_mode {args.flash_mode} --flash_freq {args.flash_freq} --flash_size {args.flash_size} "
     )
 
-    # Append binary files and their respective offsets to the new command
     for offset, bin_path in binary_files.items():
         new_command += f'{offset} "{bin_path}" '
 
@@ -62,39 +79,54 @@ def generate_merge_firmware_command(pio_env=None):
 
     command.extend(["-v", "-t", "upload", "--upload-port", "/dev/null"])
 
+    print(f"Running PlatformIO for environment: {pio_env or 'default'}...", file=sys.stderr)
     try:
         completed_process = subprocess.run(
-            command, capture_output=True, text=True, check=False
+            command, capture_output=True, text=True, check=True
         )
     except subprocess.CalledProcessError as e:
-        print(f"Error running pio command: {e}", file=sys.stderr)
-
-    if not completed_process.stdout:
-        print("No output received from pio command.", file=sys.stderr)
-        sys.exit(1)
+        print(f"Error running pio command for {pio_env}: {e}", file=sys.stderr)
+        return
 
     output_lines = completed_process.stdout.splitlines()
+    
+    # Look for lines containing write_flash and esptool execution signatures
     relevant_lines = [
-        line
-        for line in output_lines
-        if "Serial port /dev/null" in line
+        line for line in output_lines
+        if "write_flash" in line and ("esptool" in line or ".py" in line)
     ]
 
     if not relevant_lines:
-        print("No relevant lines found in the output.", file=sys.stderr)
-        sys.exit(1)
+        print(f"No relevant esptool write_flash lines found for {pio_env}.", file=sys.stderr)
+        return
 
     for line in relevant_lines:
         new_command = parse_output(line)
         if new_command:
+            print(f"\nExecuting merge command:")
             print(new_command)
-        else:
-            sys.exit(1)
+            # Execute the merge command to actually generate the `.bin` file for ESP Web Tools
+            subprocess.run(new_command, shell=True, check=True)
 
 
 if __name__ == "__main__":
+    # If specific board environments are passed, iterate through them
     if len(sys.argv) > 1:
         for pio_env in sys.argv[1:]:
             generate_merge_firmware_command(pio_env)
     else:
-        generate_merge_firmware_command()
+        # Otherwise, run for all environments defined in platformio.ini
+        result = subprocess.run(["pio", "project", "config", "--json-output"], capture_output=True, text=True)
+        import json
+        try:
+            config = json.loads(result.stdout)
+            # Find all environments defined in platformio.ini
+            envs = [env["name"] for env in config.get("envs", [])]
+            if envs:
+                print(f"Found environments: {envs}", file=sys.stderr)
+                for pio_env in envs:
+                    generate_merge_firmware_command(pio_env)
+            else:
+                generate_merge_firmware_command()
+        except Exception:
+            generate_merge_firmware_command()
