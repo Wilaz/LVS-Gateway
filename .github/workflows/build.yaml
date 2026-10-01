@@ -5,15 +5,16 @@ on: [push]
 permissions:
   contents: write
   pages: write
+  id-token: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pip
@@ -22,18 +23,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pio-
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
 
-      - name: Install PlatformIO Core
-        run: pip install --upgrade platformio
+      - name: Install PlatformIO & esptool
+        run: pip install --upgrade platformio esptool
 
-      - name: Build PlatformIO Project
-        run: python scripts/generate_merged_binaries.py esp32dev esp32s2 esp32s3 esp32c3 esp32c6
-
-      - name: Generate ESP Web Tools Manifest
-        run: python scripts/generate_manifest.py
+      - name: Build, Merge, and Generate Manifest
+        run: python release.py esp32dev esp32s2 esp32s3 esp32c3 esp32c6
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -41,12 +39,8 @@ jobs:
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'web'
+          path: "web"
 
-  deploy:
-      needs: build
-      runs-on: ubuntu-latest
-      steps:
-        - name: Deploy to GitHub Pages
-          id: deployment
-          uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
