@@ -4,6 +4,7 @@ on: [push]
 
 permissions:
   contents: write
+  pages: write
 
 jobs:
   build:
@@ -17,7 +18,9 @@ jobs:
           path: |
             ~/.cache/pip
             ~/.platformio/.cache
-          key: ${{ runner.os }}-pio
+          key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-
 
       - uses: actions/setup-python@v7
         with:
@@ -27,20 +30,23 @@ jobs:
         run: pip install --upgrade platformio
 
       - name: Build PlatformIO Project
-        run: pio run
+        run: python scripts/generate_merged_binaries.py esp32dev esp32s2 esp32s3 esp32c3 esp32c6
 
-      - name: Merge Firmware
-        run: |
-          ./generate_merge_firmware_command.py esp32dev esp32s2 esp32s3 esp32c3 esp32c6 | tee merge_firmware.bash
-          bash -ex ./merge_firmware.bash
+      - name: Generate ESP Web Tools Manifest
+        run: python scripts/generate_manifest.py
 
-      - name: Generate ESP Web Tools
-        run: |
-          ./generate_esp_web_tools.py
-          find web/
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
-      - name: Deploy to GitHub Pages
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: web/
+          path: 'web'
+
+  deploy:
+      needs: build
+      runs-on: ubuntu-latest
+      steps:
+        - name: Deploy to GitHub Pages
+          id: deployment
+          uses: actions/deploy-pages@v4
