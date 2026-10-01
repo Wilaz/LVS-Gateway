@@ -77,7 +77,7 @@ def generate_merge_firmware_command(pio_env=None):
     relevant_lines = [
         line
         for line in output_lines
-        if ("esptool" in line) and ("Serial port /dev/null" in line)
+        if "Serial port /dev/null" in line
     ]
 
     if not relevant_lines:
